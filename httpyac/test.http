@@ -1,10 +1,10 @@
 # Installing dependencies without installing node/npm
 # docker run --rm -it --workdir=/usr/src/app -v $PWD:/usr/src/app node:alpine npm install jsonpath chai
 {{
-    debugger;
+    // import some helper libs
     exports.assert = require('assert').strict
     exports.jsonpath = require('jsonpath')
-    exports.chai = require('chai')
+    exports.expect = require('chai').expect
 
 }}
 ###
@@ -58,7 +58,7 @@ GET https://httpbin.org/json
     // const jsonpath = require('./node_modules/jsonpath')
     test.status(200)
     let expectedAuth = 'Basic ' + Buffer.from('steve:mcqueen').toString('base64')
-    test("slides", () => {
+    test("simple test for json node existance - looking for 'slides' node", () => {
         assert(response.parsedBody.slideshow.slides)
     }) 
     let titles = jsonpath.query(response.parsedBody, '$.slideshow.slides[*].title')
@@ -70,6 +70,9 @@ GET https://httpbin.org/json
     })
     test("slides inludes all titles", () => {
         assert(["Wake up to WonderWidgets!","Overview"].every(v=>titles.includes(v)))
+    })
+    test("test status code with chai", () => {
+        expect(response.statusCode).to.equal(200)
     })
 
 }}
