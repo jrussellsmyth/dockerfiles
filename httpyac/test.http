@@ -1,1 +1,75 @@
-GET https://www.google.com
+# Installing dependencies without installing node/npm
+# docker run --rm -it --workdir=/usr/src/app -v $PWD:/usr/src/app node:alpine npm install jsonpath chai
+{{
+    debugger;
+    exports.assert = require('assert').strict
+    exports.jsonpath = require('jsonpath')
+    exports.chai = require('chai')
+
+}}
+###
+# A simple mocky endpoint
+# @name simple
+GET https://run.mocky.io/v3/bac05ada-7718-42f0-8de4-c6b0fcc82b69
+
+{{
+    test.status(200)
+    test("body contains name=value", () => {
+        assert.equal("value", response.parsedBody.name)
+    })
+}}
+
+###
+# @name test an array size
+GET https://run.mocky.io/v3/51582ed4-55fb-4734-8be3-2b6a26d88462
+
+{{
+    test.status(200)
+    test.header('x-some-header','x-header-value')
+    test("array size = 2", () => {
+        assert.equal(2, response.parsedBody.arrayvalue.length)
+    })
+
+}}
+
+###
+# @name testAnything
+GET https://httpbin.org/anything?flea=redhot HTTP/1.1
+Authorization: Basic steve mcqueen
+
+{{
+    test.status(200)
+    let expectedAuth = 'Basic ' + Buffer.from('steve:mcqueen').toString('base64')
+    test("Authorization Header is 'Basic {base64 encoded user:pass}", () => {
+        assert.equal(expectedAuth, response.parsedBody.headers.Authorization)
+    }) 
+    test("Flea is Red Hot", () => {
+        assert.equal('redhot', response.parsedBody.args.flea)
+    }) 
+
+}}
+
+###
+# @name testJson
+GET https://httpbin.org/json
+
+{{
+    // const assert = require('assert').strict
+    // const jsonpath = require('./node_modules/jsonpath')
+    test.status(200)
+    let expectedAuth = 'Basic ' + Buffer.from('steve:mcqueen').toString('base64')
+    test("slides", () => {
+        assert(response.parsedBody.slideshow.slides)
+    }) 
+    let titles = jsonpath.query(response.parsedBody, '$.slideshow.slides[*].title')
+    test("there are two slide titles",() => {
+        assert.equal(2, titles.length)
+    })
+    test("slide titles does not include slideshow title", () => {
+        assert(!titles.includes("Sample Slide Show"))
+    })
+    test("slides inludes all titles", () => {
+        assert(["Wake up to WonderWidgets!","Overview"].every(v=>titles.includes(v)))
+    })
+
+}}
